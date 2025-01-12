@@ -1,19 +1,29 @@
 package main
 
 import (
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/template/html/v2"
+	"net/http"
+	"polling-app.com/m/database"
+	"polling-app.com/m/routes"
+	"polling-app.com/m/templates"
 )
 
 func main() {
-	engine := html.New("./views", ".html")
-	app := fiber.New(fiber.Config{Views: engine})
+	database.CheckIfDatabaseFileExists()
+	database.AutoMigrate()
+	server := http.NewServeMux()
 
-	app.Static("/", "public")
+	server.Handle("/public", http.FileServer(http.Dir("./public")))
 
-	app.Post("/create-poll", func(c *fiber.Ctx) error {
-		return c.Render("create-poll", fiber.Map{})
-	})
+	server.HandleFunc("/", templates.HandleHomeTemplate)
+	server.HandleFunc("/success", templates.HandleSuccessTemplate)
+	server.HandleFunc("/poll", templates.HandlePollTemplate)
+	server.HandleFunc("/poll/create", routes.HandlePollCreate)
 
-	app.Listen(":3000")
+	err := http.ListenAndServe(":8080", server)
+	if err != nil {
+		println("Failed to start server", err)
+	}
+
+	println("Server started on port 8080")
+
 }

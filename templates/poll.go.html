@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Strawpoll</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pusher-js@7.0.3/dist/web/pusher.min.js"></script>
+</head>
+<body class="bg-gray-100">
+<div class="container mx-auto p-4">
+  <div class="text-center mb-8">
+    <h1 class="text-4xl font-bold text-gray-800">Strawpoll</h1>
+    <p class="text-gray-600">Vote and see results in real-time</p>
+  </div>
+  <div class="bg-white p-6 rounded-lg shadow-lg">
+    <form id="poll-form">
+      <div class="mb-4">
+        <label for="poll-option" class="block text-gray-700 font-bold mb-2">Choose an option</label>
+        <select id="poll-option" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <option value="option1">Option 1</option>
+          <option value="option2">Option 2</option>
+          <option value="option3">Option 3</option>
+        </select>
+      </div>
+      <div class="text-center">
+        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">Vote</button>
+      </div>
+    </form>
+  </div>
+  <div class="bg-white p-6 rounded-lg shadow-lg mt-8">
+    <h2 class="text-2xl font-bold text-gray-800 mb-4">Results</h2>
+    <div id="results">
+      <p>Option 1: <span id="option1-count">0</span></p>
+      <p>Option 2: <span id="option2-count">0</span></p>
+      <p>Option 3: <span id="option3-count">0</span></p>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.getElementById('poll-form').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const option = document.getElementById('poll-option').value;
+    axios.post('/vote', { option: option });
+  });
+
+  const pusher = new Pusher('YOUR_PUSHER_KEY', {
+    cluster: 'YOUR_PUSHER_CLUSTER'
+  });
+
+  const channel = pusher.subscribe('poll-channel');
+  channel.bind('vote', function(data) {
+    document.getElementById('option1-count').innerText = data.option1;
+    document.getElementById('option2-count').innerText = data.option2;
+    document.getElementById('option3-count').innerText = data.option3;
+  });
+</script>
+</body>
+</html>
