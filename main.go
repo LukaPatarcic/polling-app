@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/gorilla/mux"
 	"net/http"
 	"polling-app.com/m/database"
 	"polling-app.com/m/routes"
@@ -10,16 +11,18 @@ import (
 func main() {
 	database.CheckIfDatabaseFileExists()
 	database.AutoMigrate()
-	server := http.NewServeMux()
+	router := mux.NewRouter()
 
-	server.Handle("/public", http.FileServer(http.Dir("./public")))
+	router.PathPrefix("/public/").Handler(
+		http.StripPrefix("/public/", http.FileServer(http.Dir("./public"))))
 
-	server.HandleFunc("/", templates.HandleHomeTemplate)
-	server.HandleFunc("/success", templates.HandleSuccessTemplate)
-	server.HandleFunc("/poll", templates.HandlePollTemplate)
-	server.HandleFunc("/poll/create", routes.HandlePollCreate)
+	router.HandleFunc("/", templates.HandleHomeTemplate)
+	router.HandleFunc("/success", templates.HandleSuccessTemplate)
+	router.HandleFunc("/poll/create", routes.HandlePollCreate)
+	router.HandleFunc("/poll/vote/create", routes.HandlePollVote)
+	router.HandleFunc("/poll/{id}", templates.HandlePollTemplate)
 
-	err := http.ListenAndServe(":8080", server)
+	err := http.ListenAndServe(":8080", router)
 	if err != nil {
 		println("Failed to start server", err)
 	}
