@@ -28,7 +28,7 @@ func HandleHomeTemplate(w http.ResponseWriter, r *http.Request) {
 func HandleSuccessTemplate(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Query().Get("id")
 	data := map[string]interface{}{
-		"ID": id,
+		"Id": id,
 	}
 	handleTemplate("templates/success.go.html", w, r, data)
 }
@@ -39,9 +39,9 @@ func HandlePollTemplate(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, "Invalid poll ID", http.StatusBadRequest)
 	}
+
 	db := database.GetInstance()
-	var poll models.Poll
 	result := map[string]interface{}{}
-	db.Model(&poll).First(&result, id)
+	db.Model(models.Poll{}).First(&result, id)
 	handleTemplate("templates/poll.go.html", w, r, result)
 }

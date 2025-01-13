@@ -89,6 +89,7 @@ func HandlePollVote(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
 	}
+	
 	http.SetCookie(w, &cookie)
 	http.Redirect(w, r, "/poll/"+id, http.StatusSeeOther)
 }
